@@ -74,9 +74,11 @@ func getExchangeRate(from, to string) (float64, error) {
 
 	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return 0, err
+			return 0, err	
 	}	
-
+	if (result["result"]!="success"){
+			return 0, fmt.Errorf("exchange rate for %s to %s not found", from, to)
+	}
 	rates := result["conversion_rates"].(map[string]interface{})
 	rate, ok := rates[to]
 	if !ok {
