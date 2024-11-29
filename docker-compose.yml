@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  currency-api:
+    build:
+      context: .  
+      dockerfile: Dockerfile  
+    container_name: currency_api
+    ports:
+      - "8080:8080"  
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/mydb?sslmode=disable  # URL для подключения к базе данных
+    depends_on:
+      - db  # Зависимость от базы данных
+
+  # Служба базы данных PostgreSQL
+  db:
+    image: postgres:17  # Образ PostgreSQL
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: mydb  # Имя базы данных
+      POSTGRES_USER: user  # Имя пользователя
+      POSTGRES_PASSWORD: password  # Пароль пользователя
+    volumes:
+      - db_data:/var/lib/postgresql/data  # Объем для хранения данных
+    ports:
+      - "5435:5432"
+# Определяем объем для хранения данных
+volumes:
+  db_data:
