@@ -3,23 +3,23 @@ package main
 import (
 	"myproject/internal/config"
 	"myproject/internal/database"
+	"myproject/internal/handlers"
 	"myproject/internal/migrations"
-	"myproject/internal/services"
 	"myproject/internal/redis"
+	"myproject/internal/services"
 
 	"log"
+	"net/http"
 	"time"
 )
 
 func main() {
-
 	cfg := config.LoadConfig()
-
 	db := database.DataBasePostgres{URL: cfg.DatabaseURL}
-	var redisDB redis.RedisDataBase
-	redisDB.NewClient()
+	var rdb redis.RedisDataBase
+	rdb.Init()
 	migrations.RunMigrations(db)
-	db.GetCurrencies()
+
 	go func() {
 		for {
 			newCurrencies, err := services.GetExchangeRate()
@@ -27,12 +27,13 @@ func main() {
 				log.Println("failed to get Currencies")
 			}
 			db.UpdateCurrencies(newCurrencies)
-
+			currencies := db.GetCurrencies()
+			rdb.SetCurrencies(currencies)
 			time.Sleep(24 * time.Hour)
 
 		}
 	}()
-	time.Sleep(24 * time.Hour) // Спим 24 часа
+	http.HandleFunc("/convert", handlers.CurrencyTransferHandle)
 
 	log.Println("Database migrated successfully!")
 }
