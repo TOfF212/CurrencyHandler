@@ -38,7 +38,7 @@ func recordMigration(db *gorm.DB, name string) {
 }
 
 func RunMigrations(db database.DataBasePostgres) {
-  db.Open()
+	db.Open()
 	defer db.Close()
 	if err := MigrateTrackingTable(db.DataBase); err != nil {
 		log.Fatalf("Error creating migrations table: %v", err)

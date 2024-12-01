@@ -42,12 +42,11 @@ func (d *DataBasePostgres) GetCurrencies() []models.Currency {
 	d.Open()
 	defer d.Close()
 	var currencies []models.Currency
-    if err := d.DataBase.Find(&currencies).Error; err != nil {
-        log.Fatalf("failed to fetch currencies: %v", err)
-    }
+	if err := d.DataBase.Find(&currencies).Error; err != nil {
+		log.Fatalf("failed to fetch currencies: %v", err)
+	}
 
-  
-		return currencies
+	return currencies
 }
 
 func (d *DataBasePostgres) UpdateCurrencies(newCurrencies map[string]float64) {
