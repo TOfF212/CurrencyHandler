@@ -33,12 +33,8 @@ type RedisDataBase struct {
 func (r *RedisDataBase) Init() {
 	r.cfg = Config{
 		Addr:        "redis_db:6379",
-		Password:    "password",
-		User:        "user",
+		Password:    "",
 		DB:          0,
-		MaxRetries:  5,
-		DialTimeout: 10 * time.Second,
-		Timeout:     5 * time.Second,
 	}
 	r.ctx = context.Background()
 }
@@ -50,11 +46,6 @@ func (r *RedisDataBase) Open() {
 		Addr:         r.cfg.Addr,
 		Password:     r.cfg.Password,
 		DB:           r.cfg.DB,
-		Username:     r.cfg.User,
-		MaxRetries:   r.cfg.MaxRetries,
-		DialTimeout:  r.cfg.DialTimeout,
-		ReadTimeout:  r.cfg.Timeout,
-		WriteTimeout: r.cfg.Timeout,
 	})
 
 	if err := db.Ping(ctx).Err(); err != nil {
