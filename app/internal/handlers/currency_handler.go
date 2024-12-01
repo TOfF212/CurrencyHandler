@@ -54,7 +54,7 @@ func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  rate := rateFrom / rateTo
+  rate := rateTo / rateFrom
   convertedAmount := currRequest.Amount * rate
 
   response := models.CurrencyResponse{
