@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"myproject/internal/config"
+	"myproject/internal/database"
 	"myproject/internal/models"
+
 	"strconv"
 	"time"
 
@@ -29,7 +32,7 @@ type RedisDataBase struct {
 
 func (r *RedisDataBase) Init() {
 	r.cfg = Config{
-		Addr:        "localhost:6379",
+		Addr:        "redis_db:6379",
 		Password:    "password",
 		User:        "user",
 		DB:          0,
@@ -64,25 +67,26 @@ func (r *RedisDataBase) Close() {
 	r.Client.Close()
 }
 
-func (r *RedisDataBase) IsEmpty() bool {
+func (r *RedisDataBase) FillIfEmpty() {
 	r.Open()
 	defer r.Close()
 	keyCount, err := r.Client.DBSize(r.ctx).Result()
 	if err != nil {
 		log.Fatalf("Ошибка при проверке размера Redis: %v", err)
 	}
-	if keyCount==0{
-		return true
+	if keyCount < 162 {
+		cfg := config.LoadConfig()
+		db := database.DataBasePostgres{URL: cfg.DatabaseURL}
+		newCurr := db.GetCurrencies()
+		r.SetCurrencies(newCurr)
 	}
-	return false
-	
 }
 
 func (r *RedisDataBase) SetCurrencies(currencies []models.Currency) {
 	r.Open()
 	defer r.Close()
 	for i, curr := range currencies {
-		if err := r.Client.Set(r.ctx, curr.Currency, curr.Rate, 24*time.Second).Err(); err != nil {
+		if err := r.Client.Set(r.ctx, curr.Currency, curr.Rate, 24*time.Hour).Err(); err != nil {
 			log.Printf("failed to set data, error: %s", err.Error())
 		}
 		fmt.Printf("%d %s set in redis\n", i, curr.Currency)

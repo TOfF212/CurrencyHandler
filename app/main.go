@@ -36,4 +36,7 @@ func main() {
 	http.HandleFunc("/convert", handlers.CurrencyTransferHandle)
 
 	log.Println("Database migrated successfully!")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Println("Ошибка при запуске сервера:", err)
+	}
 }

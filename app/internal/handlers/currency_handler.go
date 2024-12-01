@@ -10,6 +10,7 @@ import (
 func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
 	var rdb redis.RedisDataBase
 	rdb.Init()
+	rdb.FillIfEmpty()
 	var currRequest = models.CurrencyRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&currRequest); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -47,8 +48,8 @@ func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get exchange rate", http.StatusInternalServerError)
 		return
 	}
-	rate := rateFrom / rateTo
-	convertedAmount := currRequest.Amount * rateTo * rateFrom
+	rate := rateFrom * rateTo
+	convertedAmount := currRequest.Amount * rate
 	response := models.CurrencyResponse{
 		Amount:          currRequest.Amount,
 		ConvertedAmount: convertedAmount,
