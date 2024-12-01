@@ -4,7 +4,6 @@ import (
 	"log"
 	"myproject/internal/config"
 
-	"fmt"
 	"myproject/internal/models"
 
 	"gorm.io/driver/postgres"
@@ -49,31 +48,33 @@ func (d *DataBasePostgres) GetCurrencies() []models.Currency {
 	return currencies
 }
 
-func (d *DataBasePostgres) UpdateCurrencies(newCurrencies map[string]float64) {
+func (d *DataBasePostgres) UpdateCurrencies(newCurrencies map[string]float64) error {
 	d.Open()
 	defer d.Close()
+
 	for currencyCode, rate := range newCurrencies {
 		newCurrency := models.Currency{Currency: currencyCode, Rate: rate}
 		var currency models.Currency
-		if err := d.DataBase.Where("currency = ?", currencyCode).First(&currency).Error; err != nil {
-			if err == gorm.ErrRecordNotFound {
-				err = nil
-				if err := d.DataBase.Save(&newCurrency).Error; err != nil {
-					log.Printf("failed to save new currency %s: %v", currencyCode, err)
-				}
-			} else {
-				log.Fatalf("error when executing the request: %v", err)
+		err := d.DataBase.Where("currency = ?", currencyCode).First(&currency).Error
+		if err != nil {
+			log.Fatalf("failed to get currencies from database, %v", err)
+		}
+		if currency.ID == 0 {
+			err = d.DataBase.Save(&newCurrency).Error
+			if err != nil {
+				log.Printf("failed to save new currency %s: %v", currencyCode, err)
+				return err
 			}
-		} else {
-			if currency.Rate != rate {
-				currency.Rate = rate
-				if err := d.DataBase.Save(&currency).Error; err != nil {
-					log.Fatalf("error when executing the request: %v", err)
-				}
-				fmt.Printf("%s is update\n", currencyCode)
-			} else {
-				fmt.Printf("%s matches, no update required\n", currencyCode)
+			continue
+		}
+
+		if currency.Rate != rate {
+			currency.Rate = rate
+			if err := d.DataBase.Save(&currency).Error; err != nil {
+				log.Fatalf("error when executing the request: %v", err)
+				return err
 			}
 		}
 	}
+	return nil
 }

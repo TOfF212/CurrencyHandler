@@ -26,7 +26,10 @@ func main() {
 			if err != nil {
 				log.Println("failed to get Currencies")
 			}
-			db.UpdateCurrencies(newCurrencies)
+			err = db.UpdateCurrencies(newCurrencies)
+			if err != nil {
+				log.Fatalf("failed to update database: %v", err)
+			}
 			currencies := db.GetCurrencies()
 			rdb.SetCurrencies(currencies)
 			time.Sleep(24 * time.Hour)

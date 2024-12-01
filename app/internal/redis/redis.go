@@ -94,19 +94,19 @@ func (r *RedisDataBase) SetCurrencies(currencies []models.Currency) {
 }
 
 func (r *RedisDataBase) GateRate(currency string) (float64, error) {
-	r.Open()
-	defer r.Close()
-	val, err := r.Client.Get(r.ctx, currency).Result()
-	if err == redis.Nil {
-		return 0, models.ErrorCurrencyNotFound
-	} else if err != nil {
-		log.Print("error get currency from redis")
-		return 0, err
-	}
+  r.Open()
+  defer r.Close()
+  val, err := r.Client.Get(r.ctx, currency).Result()
+  if err == redis.Nil {
+    return 0, models.ErrorCurrencyNotFound
+  } else if err != nil {
+    log.Print("error get currency from redis")
+    return 0, err
+  }
 
-	rate, err := strconv.ParseFloat(val, 64)
-	if err != nil {
-
-	}
-	return rate, nil
+  rate, err := strconv.ParseFloat(val, 64)
+  if err != nil {
+    return 0, err
+  }
+  return rate, nil
 }
