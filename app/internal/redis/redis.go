@@ -56,20 +56,7 @@ func (r *RedisDataBase) Close() {
 	r.Client.Close()
 }
 
-// func (r *RedisDataBase) FillIfEmpty() {
-// 	r.Open()
-// 	defer r.Close()
-// 	keyCount, err := r.Client.DBSize(r.ctx).Result()
-// 	if err != nil {
-// 		log.Fatalf("Ошибка при проверке размера Redis: %v", err)
-// 	}
-// 	if keyCount < 162 {
-// 		cfg := config.LoadConfig()
-// 		db := database.DataBasePostgres{URL: cfg.DatabaseURL}
-// 		newCurr := db.GetCurrencies()
-// 		r.SetCurrencies(newCurr)
-// 	}
-// }
+
 
 func (r *RedisDataBase) SetCurrency(curr models.Currency) {
 	r.Open()

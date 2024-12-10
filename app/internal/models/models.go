@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	ErrorCurrencyNotFound        = errors.New("final currency is required ")
+	ErrorCurrencyNotFound        = errors.New("currency is not found ")
 	ErrorAmountRequired          = errors.New("amount of currency is required ")
 	ErrorAmountInvalid           = errors.New("amount of currency is invalid ")
 	ErrorInitialCurrencyRequired = errors.New("initial currency is required ")

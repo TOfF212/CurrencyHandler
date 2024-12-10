@@ -3,6 +3,10 @@ package services
 import (
 	"encoding/json"
 	"log"
+	"myproject/internal/config"
+	"myproject/internal/database"
+	"myproject/internal/models"
+	"myproject/internal/redis"
 	"net/http"
 )
 
@@ -30,4 +34,24 @@ func GetExchangeRate() (map[string]float64, error) {
 		}
 	}
 	return rates, err
+}
+
+func GateRate(currCode string) (float64, error) {
+	var rdb redis.RedisDataBase
+	cfg := config.LoadConfig()
+	db := database.DataBasePostgres{URL: cfg.DatabaseURL}
+	rdb.Init()
+
+	rate, err := rdb.GateRate(currCode)
+	if err == models.ErrorCurrencyNotFound {
+		curr, err := db.GetCurrency(currCode)
+		if err != nil {
+			return 0, err
+		}
+		rdb.SetCurrency(curr)
+		rate = curr.Rate
+	} else if err != nil {
+		return 0, err
+	}
+	return rate, nil
 }
