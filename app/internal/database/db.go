@@ -48,17 +48,17 @@ func (d *DataBasePostgres) GetCurrencies() []models.Currency {
 	return currencies
 }
 
-func (d *DataBasePostgres)GetCurrency(curr string)(models.Currency, error){
+func (d *DataBasePostgres) GetCurrency(curr string) (models.Currency, error) {
 	d.Open()
 	defer d.Close()
 	var currency models.Currency
 	if err := d.DataBase.Where("currency = ?", curr).First(&currency).Error; err == gorm.ErrRecordNotFound {
-    return currency, models.ErrorCurrencyNotFound
-} else if err!=nil{
-		log.Printf("error with get currency from database, %v",err)
+		return currency, models.ErrorCurrencyNotFound
+	} else if err != nil {
+		log.Printf("error with get currency from database, %v", err)
 		return currency, err
 	}
-	return currency, nil 
+	return currency, nil
 }
 
 func (d *DataBasePostgres) UpdateCurrencies(newCurrencies map[string]float64) error {
