@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"myproject/internal/models"
 	"myproject/internal/redis"
+  "myproject/internal/database"
+  "myproject/internal/config"
 	"net/http"
 )
 
 func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
   var rdb redis.RedisDataBase
+  cfg := config.LoadConfig()
+	db := database.DataBasePostgres{URL: cfg.DatabaseURL}
   rdb.Init()
-  rdb.FillIfEmpty()
 
   var currRequest = models.CurrencyRequest{}
   if err := json.NewDecoder(r.Body).Decode(&currRequest); err != nil {
@@ -38,9 +41,17 @@ func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
   }
 
   rateTo, err := rdb.GateRate(currRequest.ToCurrency)
-
   if err == models.ErrorCurrencyNotFound {
-    http.Error(w, err.Error(), http.StatusBadRequest)
+    err=nil
+    curr, err:=db.GetCurrency(currRequest.ToCurrency)
+    if err==models.ErrorCurrencyNotFound{
+      http.Error(w, err.Error(), http.StatusBadRequest)
+    } else if err != nil {
+      http.Error(w, "Failed to get exchange rate", http.StatusInternalServerError)
+      return
+    }
+    rdb.SetCurrency(curr)
+    rateTo=curr.Rate
   } else if err != nil {
     http.Error(w, "Failed to get exchange rate", http.StatusInternalServerError)
     return
@@ -48,7 +59,16 @@ func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
 
   rateFrom, err := rdb.GateRate(currRequest.FromCurrency)
   if err == models.ErrorCurrencyNotFound {
-    http.Error(w, err.Error(), http.StatusBadRequest)
+    err=nil
+    curr, err:=db.GetCurrency(currRequest.FromCurrency)
+    if err==models.ErrorCurrencyNotFound{
+      http.Error(w, err.Error(), http.StatusBadRequest)
+    } else if err != nil {
+      http.Error(w, "Failed to get exchange rate", http.StatusInternalServerError)
+      return
+    }
+    rdb.SetCurrency(curr)
+    rateFrom=curr.Rate
   } else if err != nil {
     http.Error(w, "Failed to get exchange rate", http.StatusInternalServerError)
     return
