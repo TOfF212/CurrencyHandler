@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"api/internal/database"
+	"api/internal/models"
+	"api/internal/redis"
+	"api/internal/services"
 	"encoding/json"
-	"myproject/internal/models"
-	"myproject/internal/services"
 	"net/http"
 )
 
@@ -29,7 +31,7 @@ func CheckRequest(w http.ResponseWriter, currRequest models.CurrencyRequest) err
 		return err
 	}
 }
-func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
+func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request, db database.DataBasePostgres, rdb redis.RedisDataBase) {
 	var currRequest = models.CurrencyRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&currRequest); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -39,7 +41,7 @@ func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rateTo, err := services.GateRate(currRequest.ToCurrency)
+	rateTo, err := services.GateRate(currRequest.ToCurrency, db, rdb)
 	if err == models.ErrorCurrencyNotFound {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else if err != nil {
@@ -47,7 +49,7 @@ func CurrencyTransferHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rateFrom, err := services.GateRate(currRequest.FromCurrency)
+	rateFrom, err := services.GateRate(currRequest.FromCurrency, db, rdb)
 	if err == models.ErrorCurrencyNotFound {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else if err != nil {

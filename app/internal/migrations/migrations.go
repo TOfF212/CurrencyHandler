@@ -1,8 +1,8 @@
 package migrations
 
 import (
+	"api/internal/database"
 	"log"
-	"myproject/internal/database"
 
 	"gorm.io/gorm"
 )

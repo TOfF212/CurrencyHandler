@@ -1,12 +1,11 @@
 package services
 
 import (
+	"api/internal/database"
+	"api/internal/models"
+	"api/internal/redis"
 	"encoding/json"
 	"log"
-	"myproject/internal/config"
-	"myproject/internal/database"
-	"myproject/internal/models"
-	"myproject/internal/redis"
 	"net/http"
 )
 
@@ -36,11 +35,7 @@ func GetExchangeRate() (map[string]float64, error) {
 	return rates, err
 }
 
-func GateRate(currCode string) (float64, error) {
-	var rdb redis.RedisDataBase
-	cfg := config.LoadConfig()
-	db := database.DataBasePostgres{URL: cfg.DatabaseURL}
-	rdb.Init()
+func GateRate(currCode string, db database.DataBasePostgres, rdb redis.RedisDataBase) (float64, error) {
 
 	rate, err := rdb.GateRate(currCode)
 	if err == models.ErrorCurrencyNotFound {

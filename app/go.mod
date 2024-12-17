@@ -1,4 +1,4 @@
-module myproject
+module api
 
 go 1.23
 

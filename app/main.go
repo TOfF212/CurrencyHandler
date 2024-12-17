@@ -1,12 +1,12 @@
 package main
 
 import (
-	"myproject/internal/config"
-	"myproject/internal/database"
-	"myproject/internal/handlers"
-	"myproject/internal/migrations"
-	"myproject/internal/redis"
-	"myproject/internal/services"
+	"api/internal/config"
+	"api/internal/database"
+	"api/internal/handlers"
+	"api/internal/migrations"
+	"api/internal/redis"
+	"api/internal/services"
 
 	"log"
 	"net/http"
@@ -36,7 +36,9 @@ func main() {
 
 		}
 	}()
-	http.HandleFunc("/convert", handlers.CurrencyTransferHandle)
+	http.HandleFunc("/convert", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CurrencyTransferHandle(w, r, db, rdb)
+	})
 
 	log.Println("Database migrated successfully!")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

@@ -1,10 +1,10 @@
 package redis
 
 import (
+	"api/internal/models"
 	"context"
 	"fmt"
 	"log"
-	"myproject/internal/models"
 
 	"strconv"
 	"time"
@@ -55,8 +55,6 @@ func (r *RedisDataBase) Open() {
 func (r *RedisDataBase) Close() {
 	r.Client.Close()
 }
-
-
 
 func (r *RedisDataBase) SetCurrency(curr models.Currency) {
 	r.Open()

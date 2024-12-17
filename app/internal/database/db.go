@@ -1,10 +1,10 @@
 package database
 
 import (
+	"api/internal/config"
 	"log"
-	"myproject/internal/config"
 
-	"myproject/internal/models"
+	"api/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
